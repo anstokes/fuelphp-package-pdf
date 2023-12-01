@@ -17,6 +17,7 @@
 	"suggest": {
 		"tecnickcom/tcpdf": "^6.6",
 		"dompdf/dompdf": "^2.0",
-		"setasign/fpdf": "^1.8"
+		"setasign/fpdf": "^1.8",
+		"setasign/fpdi": "^2.0"
 	}
 }
