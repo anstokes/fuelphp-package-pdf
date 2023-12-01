@@ -25,6 +25,9 @@ class Pdf
     // Driver Instance
     protected $driverInstance = '';
 
+    // Silently fail, if method not found
+    protected $silentFail = false;
+
     /**
      * Construct
      *
@@ -49,7 +52,7 @@ class Pdf
         // Get driver configuration
         $drivers = Config::get('pdf.drivers');
         $driverConfiguration = Arr::get($drivers, $driver);
-        if ($driverConfiguration === false) {
+        if (! is_array($driverConfiguration)) {
             throw new \Exception(sprintf('Driver \'%s\' doesn\'t exist.', $driver));
         }
 
@@ -70,13 +73,23 @@ class Pdf
         if (is_subclass_of($this->driverClass, 'TCPDF')) {
             // TCPDF options arguments
             $instance = $reflect->newInstanceArgs($options);
-            $this->driverInstance = $instance;
 
-            $this->loadFonts();
+            // Load fonts
+            $this->driverInstance = $instance;
+            $this->loadFonts();    
+        } else if (is_subclass_of($this->driverClass, 'fpdf')) {
+            // Parameters
+            $parameters = ['orientiation', 'unit', 'size'];
+            $arguments = [];
+            foreach($parameters as $parameter) {
+                $arguments = isset($options[$parameter]) ? $options[$parameter] : null;
+            }
+            $instance = $reflect->newInstanceArgs($options);
         } else {
             $instance = $reflect->newInstance($options);
-            $this->driverInstance = $instance;
         }
+
+        $this->driverInstance = $instance;
     }
 
     public function class()
@@ -93,6 +106,12 @@ class Pdf
      */
     public static function forge($driver = null, $options = [])
     {
+        // If drivers require default options to avoid errors, set them here
+        switch ($driver) {
+            default:
+                break;
+        }
+
         return new Pdf($driver, $options);
     }
 
@@ -169,6 +188,8 @@ class Pdf
             return ($return !== false) ? $return : $this;
         }
 
-        throw new \Exception(sprintf('Call to undefined method %s::%s()', get_called_class(), $method));
+        if (!$this->silentFail) {
+            throw new \Exception(sprintf('Call to undefined method %s::%s()', get_called_class(), $method));
+        }
     }
 }
