@@ -13,5 +13,10 @@
 	"require": {
 		"php": ">=5.4",
 		"composer/installers": "~1.0"
+	},
+	"suggest": {
+		"tecnickcom/tcpdf": "^6.6",
+		"dompdf/dompdf": "^2.0",
+		"setasign/fpdf": "^1.8"
 	}
 }
